@@ -40,7 +40,13 @@ const getBadRequest = (request, response, acceptedTypes, params) => {
   };
 
   // if it does not have valid=true
-  if ((!params.valid || params.valid !== 'true') && acceptedTypes[0] === 'application/json') {
+  if (!params.valid || params.valid !== 'true') {
+    badRequest.message = 'Missing valid query parameter set to true';
+    badRequest.id = 'badRequest';
+  }
+
+  // Checks if JSON
+  if (acceptedTypes[0] === 'application/json') {
     badRequest.message = 'Missing valid query parameter set to true';
     badRequest.id = 'badRequest';
     const badString = JSON.stringify(badRequest);
@@ -48,8 +54,8 @@ const getBadRequest = (request, response, acceptedTypes, params) => {
     return respond(request, response, 400, badString, 'application/json');
   }
 
-  // check if it xml
-  if ((!params.valid || params.valid !== 'true') && acceptedTypes[0] === 'text/xml') {
+  // checks if XML
+  if (acceptedTypes[0] === 'text/xml') {
     badRequest.message = 'Missing valid query parameter set to true';
     badRequest.id = 'badRequest';
     const responseXML = `<response><message>${badRequest.message}</message><id>${badRequest.id}</id></response>`;
@@ -68,8 +74,15 @@ const getUnauthorized = (request, response, acceptedTypes, params) => {
     message: 'You have successfully viewed the content.',
   };
 
-  // if it has valid-true
-  if ((!params.valid || params.valid !== 'true') && acceptedTypes[0] === 'application/json') {
+  // if it has no valid-true
+  if (!params.loggedIn || params.loggedIn !== 'yes') {
+    // setting error message
+    unAuthorized.message = 'Missing loggedIn query parameter set to yes';
+    // giving id
+    unAuthorized.id = 'unauthorized';
+  }
+
+  if (acceptedTypes[0] === 'application/json') {
     // setting error message
     unAuthorized.message = 'Missing loggedIn query parameter set to yes';
     // giving id
@@ -81,7 +94,7 @@ const getUnauthorized = (request, response, acceptedTypes, params) => {
   }
 
   // check if it xml
-  if ((!params.valid || params.valid !== 'true') && acceptedTypes[0] === 'text/xml') {
+  if (acceptedTypes[0] === 'text/xml') {
     unAuthorized.message = 'Missing valid query parameter set to true';
     unAuthorized.id = 'unauthorized';
     const responseXML = `<response><message>${unAuthorized.message}</message><id>${unAuthorized.id}</id></response>`;
