@@ -6,6 +6,87 @@
   
   <script>
 
+    const handleResponse = (response) => {
+      response.text().then((resText) => {
+
+        //grabbing the Content-Type header from the response.
+        const contentType = response.headers.get('Content-Type');
+
+        const content = document.querySelector('#content');
+        content.textContent = "";
+        const page = document.querySelector('#page');
+
+        //title
+        const h1 = document.createElement('h1');
+        //Message
+        const p = document.createElement('p');
+
+        //if server sent back json
+        if(contentType === 'application/json') {
+          //parse json back into javascript object.
+          console.log(resText);
+          const parsedResponse = JSON.parse(resText);
+          p.textContent = `Message: ${parsedResponse.message}`;
+        } else if (contentType == 'text/xml'){
+          console.log(resText);
+          const parsedResponse = new window.DOMParser().parseFromString(resText, 'text/xml');
+          p.textContent = 'Message: ' + parsedResponse.querySelector('message').textContent; 
+        }
+
+        //Getting title of h1
+        if(page.value === '/success'){
+          h1.textContent = `Success`;
+        } else if (page.value === '/badRequest')
+        {
+          h1.textContent = `Bad Request`;
+        } else if (page.value === '/unauthorized')
+        {
+          h1.textContent = `Unauthorized`;
+        } else if (page.value === '/forbidden')
+        {
+          h1.textContent = `Forbidden`;
+        } else if (page.value === '/internal')
+        {
+          h1.textContent = `Internal Server Error`;
+        } else if (page.value === '/notImplemented')
+        {
+          h1.textContent = `Not Implemented`;
+        } else if (page.value === '/notFound')
+        {
+          h1.textContent = `Not Found`;
+        }
+        content.appendChild(h1);
+        content.appendChild(p);
+      });
+    };
+
+    //Using Fetch API to fetch data
+    const sendFetchRequest = (url, acceptedType) => {
+        const options = {
+          method: 'GET',
+          headers: {'Accept': acceptedType}
+        }
+
+        const fetchPromise = fetch(url, options);
+
+        fetchPromise.then((response) => handleResponse(response));
+      }
+
+    const init = () => {
+
+      const sendButton = document.querySelector("#send");
+
+      const page = document.querySelector("#page");
+
+      const type = document.querySelector("#type");
+
+      const send = () => sendFetchRequest(`${page.value}`, `${type.value}`);
+
+      sendButton.addEventListener('click', send);
+
+    };
+
+    window.onload = init;
   </script>
 </head>
 <body>
